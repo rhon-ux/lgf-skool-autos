@@ -47,8 +47,8 @@ if (!existsSync(join(root, ".git"))) {
   runGit(["init"]);
 }
 
-runGit(["config", "user.name", "recillagimson"], { allowFail: true });
-runGit(["config", "user.email", "recillagimson@users.noreply.github.com"], {
+runGit(["config", "user.name", "rhon-ux"], { allowFail: true });
+runGit(["config", "user.email", "rhon-ux@users.noreply.github.com"], {
   allowFail: true,
 });
 
@@ -78,36 +78,45 @@ console.log(`\nPushing to ${GITHUB_REMOTE} ...`);
 runGit(["push", "-u", "origin", "main"]);
 
 console.log("\nEnabling GitHub Pages (Actions workflow)...");
-try {
-  execFileSync(
-    gh,
-    [
-      "api",
-      `repos/${GITHUB_OWNER}/${GITHUB_REPO}/pages`,
-      "-X",
-      "POST",
-      "-f",
-      "build_type=workflow",
-    ],
-    { cwd: root, stdio: "inherit", env: gitEnv },
-  );
-} catch {
-  execFileSync(
-    gh,
-    [
-      "api",
-      `repos/${GITHUB_OWNER}/${GITHUB_REPO}/pages`,
-      "-X",
-      "PUT",
-      "-f",
-      "build_type=workflow",
-    ],
-    { cwd: root, stdio: "inherit", env: gitEnv },
+let pagesEnabled = false;
+for (const method of ["POST", "PUT"]) {
+  try {
+    execFileSync(
+      gh,
+      [
+        "api",
+        `repos/${GITHUB_OWNER}/${GITHUB_REPO}/pages`,
+        "-X",
+        method,
+        "-f",
+        "build_type=workflow",
+      ],
+      { cwd: root, stdio: "pipe", env: gitEnv },
+    );
+    pagesEnabled = true;
+    break;
+  } catch {
+    // try next method or fall through to manual instructions
+  }
+}
+
+if (!pagesEnabled) {
+  console.log(
+    "Could not enable Pages via API (enable manually once):\n" +
+      `  https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/settings/pages\n` +
+      "  Source → GitHub Actions",
   );
 }
 
 console.log(`\nTriggering deploy workflow: ${DEPLOY_WORKFLOW}`);
-runGh(["workflow", "run", DEPLOY_WORKFLOW, "--ref", "main"]);
+try {
+  runGh(["workflow", "run", DEPLOY_WORKFLOW, "--ref", "main"]);
+} catch {
+  console.log(
+    "Could not trigger workflow automatically. After enabling Pages, run:\n" +
+      "  npm run github:deploy",
+  );
+}
 
 console.log(`
 Done! Your repo is live at:
