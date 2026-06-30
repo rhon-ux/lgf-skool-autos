@@ -1,0 +1,36 @@
+{
+  "name": "lgf-skool-automation",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "lint": "oxlint src/App.jsx src/main.jsx src/components",
+    "preview": "vite preview",
+    "db:push": "npx supabase db push",
+    "db:link": "npx supabase link",
+    "db:verify": "node scripts/verify-db.mjs",
+    "setup:gh": "node scripts/install-gh.mjs",
+    "gh": "node scripts/run-gh.mjs",
+    "gh:auth": "node scripts/run-gh.mjs auth login",
+    "gh:status": "node scripts/run-gh.mjs auth status",
+    "github:secrets": "node scripts/github-secrets.mjs",
+    "github:deploy": "node scripts/github-deploy.mjs",
+    "github:push": "node scripts/github-push.mjs",
+    "setup:git": "node scripts/install-git.mjs",
+    "postinstall": "node scripts/install-gh.mjs"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.108.2",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.2",
+    "oxlint": "^1.69.0",
+    "vite": "^8.1.0"
+  }
+}

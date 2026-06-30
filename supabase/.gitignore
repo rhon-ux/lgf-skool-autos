@@ -1,0 +1,4 @@
+# Supabase local development (never commit)
+.branches
+.temp
+.env
