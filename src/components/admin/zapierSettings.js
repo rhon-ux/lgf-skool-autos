@@ -25,3 +25,16 @@ export function storeZapierSettings({ webhook, events }) {
     }),
   );
 }
+
+/** POST JSON to a Zapier Catch Hook (must use cors — no-cors blocks application/json). */
+export async function postZapierWebhook(url, body) {
+  const response = await fetch(url.trim(), {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  if (!response.ok) {
+    throw new Error(`Webhook returned ${response.status}`);
+  }
+  return response;
+}

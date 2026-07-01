@@ -3596,7 +3596,10 @@ td.date {
 }
 
 .fb-zap-actions {
-  margin-bottom: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 0.5rem;
 }
 
 .fb-payload-ref {

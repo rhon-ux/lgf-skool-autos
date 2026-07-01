@@ -20,6 +20,8 @@ export default function FbGroupTransferPage({
   zapWebhook,
   zapSaved,
   onSaveWebhook,
+  onTestWebhook,
+  zapTesting,
   onWebhookChange,
   onSendBatch,
   onNotify,
@@ -203,7 +205,18 @@ export default function FbGroupTransferPage({
             >
               {zapSaved ? "✓ Webhook saved" : "Save webhook"}
             </button>
+            <button
+              type="button"
+              className="btn btn-primary btn-primary--xs"
+              onClick={() => onTestWebhook?.()}
+              disabled={!zapWebhook?.trim() || zapTesting}
+            >
+              {zapTesting ? "Sending…" : "Test webhook"}
+            </button>
           </div>
+          <p className="fb-field-hint">
+            After saving, click <strong>Test webhook</strong>, then in Zapier click <strong>Test trigger</strong>.
+          </p>
 
           <details className="fb-payload-ref">
             <summary>Zapier payload preview</summary>

@@ -48,6 +48,7 @@ import {
   DEFAULT_ZAPIER_EVENTS,
   loadZapierSettings,
   storeZapierSettings,
+  postZapierWebhook,
 } from "./zapierSettings";
 
 export default function AdminDashboard() {
@@ -135,11 +136,10 @@ export default function AdminDashboard() {
     const entry = { time: new Date().toLocaleTimeString(), event: eventId, payload, status: "pending" };
     setZapLog(prev => [...prev, entry]);
     try {
-      await fetch(zapWebhook, {
-        method: "POST",
-        mode: "no-cors",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ event: eventId, timestamp: new Date().toISOString(), data: payload }),
+      await postZapierWebhook(zapWebhook, {
+        event: eventId,
+        timestamp: new Date().toISOString(),
+        data: payload,
       });
       setZapLog(prev => prev.map((e, i) => i === prev.length - 1 ? { ...e, status: "sent" } : e));
     } catch {
@@ -297,9 +297,9 @@ export default function AdminDashboard() {
     const entry = { time: new Date().toLocaleTimeString(), event: "test.ping", payload, status: "pending" };
     setZapLog(prev => [...prev, entry]);
     try {
-      await fetch(zapWebhook, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+      await postZapierWebhook(zapWebhook, payload);
       setZapLog(prev => prev.map((e, i) => i === prev.length - 1 ? { ...e, status: "sent" } : e));
-      notify("Test webhook fired — check Zapier");
+      notify("Test webhook fired — click Test trigger in Zapier");
     } catch {
       setZapLog(prev => prev.map((e, i) => i === prev.length - 1 ? { ...e, status: "error" } : e));
       notify("Webhook failed", "error");
@@ -382,6 +382,8 @@ export default function AdminDashboard() {
             zapSaved={zapSaved}
             onWebhookChange={value => { setZapWebhook(value); setZapSaved(false); }}
             onSaveWebhook={handleSaveWebhook}
+            onTestWebhook={handleTestZap}
+            zapTesting={zapTesting}
             onSendBatch={payload => triggerZapier("fb_transfer.daily_batch", payload)}
             onNotify={notify}
           />
