@@ -44,6 +44,11 @@ import {
   storeEventReminders,
   getCommunityById,
 } from "./eventRemindersData";
+import {
+  DEFAULT_ZAPIER_EVENTS,
+  loadZapierSettings,
+  storeZapierSettings,
+} from "./zapierSettings";
 
 export default function AdminDashboard() {
   const [page, setPage] = useState("login");
@@ -57,10 +62,10 @@ export default function AdminDashboard() {
   const [search, setSearch] = useState("");
   const [memberFilters, setMemberFilters] = useState(DEFAULT_MEMBER_FILTERS);
   const [showAddModal, setShowAddModal] = useState(false);
-  const [zapWebhook, setZapWebhook] = useState("");
-  const [zapEvents, setZapEvents] = useState(["member.created", "fb_transfer.daily_batch"]);
+  const [zapWebhook, setZapWebhook] = useState(() => loadZapierSettings()?.webhook ?? "");
+  const [zapEvents, setZapEvents] = useState(() => loadZapierSettings()?.events ?? DEFAULT_ZAPIER_EVENTS);
   const [zapLog, setZapLog] = useState([]);
-  const [zapSaved, setZapSaved] = useState(false);
+  const [zapSaved, setZapSaved] = useState(() => Boolean(loadZapierSettings()?.webhook?.trim()));
   const [zapTesting, setZapTesting] = useState(false);
   const [editMember, setEditMember] = useState(null);
   const [newMember, setNewMember] = useState(DEFAULT_NEW_MEMBER);
@@ -263,6 +268,28 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleSaveWebhook = () => {
+    const url = zapWebhook.trim();
+    if (!url) {
+      notify("Enter a Zapier webhook URL first", "error");
+      return;
+    }
+    if (!/^https?:\/\//i.test(url)) {
+      notify("Webhook URL must start with http:// or https://", "error");
+      return;
+    }
+    setZapWebhook(url);
+    storeZapierSettings({ webhook: url, events: zapEvents });
+    setZapSaved(true);
+    notify("Webhook saved");
+  };
+
+  const handleZapEventsChange = (id, checked) => {
+    const next = checked ? [...zapEvents, id] : zapEvents.filter(x => x !== id);
+    setZapEvents(next);
+    if (zapSaved) storeZapierSettings({ webhook: zapWebhook, events: next });
+  };
+
   const handleTestZap = async () => {
     if (!zapWebhook) return;
     setZapTesting(true);
@@ -354,7 +381,7 @@ export default function AdminDashboard() {
             zapWebhook={zapWebhook}
             zapSaved={zapSaved}
             onWebhookChange={value => { setZapWebhook(value); setZapSaved(false); }}
-            onSaveWebhook={() => { if (zapWebhook) { setZapSaved(true); notify("Webhook saved"); } }}
+            onSaveWebhook={handleSaveWebhook}
             onSendBatch={payload => triggerZapier("fb_transfer.daily_batch", payload)}
             onNotify={notify}
           />
@@ -399,13 +426,11 @@ export default function AdminDashboard() {
             zapWebhook={zapWebhook}
             onWebhookChange={value => { setZapWebhook(value); setZapSaved(false); }}
             zapEvents={zapEvents}
-            onEventsChange={(id, checked) => {
-              setZapEvents(prev => checked ? [...prev, id] : prev.filter(x => x !== id));
-            }}
+            onEventsChange={handleZapEventsChange}
             zapLog={zapLog}
             onClearLog={() => setZapLog([])}
             zapSaved={zapSaved}
-            onSaveWebhook={() => { if (zapWebhook) { setZapSaved(true); notify("Webhook saved"); } }}
+            onSaveWebhook={handleSaveWebhook}
             zapTesting={zapTesting}
             onTestWebhook={handleTestZap}
           />

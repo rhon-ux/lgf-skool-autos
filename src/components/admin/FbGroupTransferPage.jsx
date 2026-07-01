@@ -196,8 +196,12 @@ export default function FbGroupTransferPage({
           </div>
 
           <div className="fb-zap-actions">
-            <button type="button" className="btn btn-secondary btn-secondary--xs" onClick={onSaveWebhook}>
-              {zapSaved ? "Webhook saved" : "Save webhook"}
+            <button
+              type="button"
+              className="btn btn-secondary btn-secondary--xs"
+              onClick={() => onSaveWebhook?.()}
+            >
+              {zapSaved ? "✓ Webhook saved" : "Save webhook"}
             </button>
           </div>
 
