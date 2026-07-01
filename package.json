@@ -11,6 +11,7 @@
     "db:push": "npx supabase db push",
     "db:link": "npx supabase link",
     "db:verify": "node scripts/verify-db.mjs",
+    "db:connect": "node scripts/connect-supabase.mjs",
     "setup:gh": "node scripts/install-gh.mjs",
     "gh": "node scripts/run-gh.mjs",
     "gh:auth": "node scripts/run-gh.mjs auth login",

@@ -3,9 +3,12 @@ import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { execFileSync } from "node:child_process";
 import { ensureGhInstalled } from "./install-gh.mjs";
+import { ensureGitInstalled, gitPathEnv } from "./install-git.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const gh = await ensureGhInstalled({ quiet: true });
+const git = await ensureGitInstalled({ quiet: true });
+const gitEnv = gitPathEnv(git);
 
 function loadEnvFile(filename) {
   const path = resolve(root, filename);
@@ -30,7 +33,7 @@ function loadEnvFile(filename) {
 }
 
 function runGh(args) {
-  execFileSync(gh, args, { stdio: "inherit" });
+  execFileSync(gh, args, { stdio: "inherit", env: gitEnv });
 }
 
 const env = { ...loadEnvFile(".env.local"), ...loadEnvFile(".env") };
@@ -58,7 +61,7 @@ for (const key of secretKeys) {
     continue;
   }
   console.log(`  set   ${key}`);
-  execFileSync(gh, ["secret", "set", key, "--body", value], { stdio: "inherit" });
+  execFileSync(gh, ["secret", "set", key, "--body", value], { stdio: "inherit", env: gitEnv });
   setCount += 1;
 }
 

@@ -1,11 +1,14 @@
 import { execFileSync } from "node:child_process";
 import { ensureGhInstalled } from "./install-gh.mjs";
+import { ensureGitInstalled, gitPathEnv } from "./install-git.mjs";
 
 const gh = await ensureGhInstalled({ quiet: true });
+const git = await ensureGitInstalled({ quiet: true });
+const gitEnv = gitPathEnv(git);
 const workflow = process.argv[2] ?? "Deploy to GitHub Pages";
 
 function runGh(args) {
-  execFileSync(gh, args, { stdio: "inherit" });
+  execFileSync(gh, args, { stdio: "inherit", env: gitEnv });
 }
 
 console.log("Checking GitHub auth...");
